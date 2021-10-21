@@ -16,8 +16,8 @@ pipeline {
             }
             steps {
                 echo 'Retrieve source from github. run npm install and npm test'
-                git branch: 'manny-jenkins',
-                    url: 'https://github.com/isMunim/AdvDevOpsLearning-Frontend.git'
+                git branch: 'development',
+                    url: 'https://github.com/mannyaboah/AdvDevOpsLearning-Frontend.git'
                 echo 'checking if that worked'
                 sh 'ls -a'
                 sh 'npm install'
@@ -56,7 +56,7 @@ pipeline {
                 sh 'gcloud container clusters get-credentials manny-cluster --zone us-central1-a --project dtc-102021-u106'
                 
                 echo 'set image to update the container'
-                sh 'kubectl set image deployment/nodefrontend nodefrontend=$imageName:$BUILD_NUMBER'
+                sh 'kubectl set image deployment/nodefrontend nodefrontend=$imageName:$BUILD_NUMBER --namespace=development-namespace'
             }
         }     
         stage('Remove local docker image') {
