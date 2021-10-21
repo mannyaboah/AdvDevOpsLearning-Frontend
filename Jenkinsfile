@@ -6,7 +6,7 @@ pipeline {
         dockerImage = ''
         }
     stages {
-        
+        // Test stage
         stage('Run the tests') {
              agent {
                 docker { 
