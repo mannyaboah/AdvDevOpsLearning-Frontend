@@ -6,8 +6,7 @@ pipeline {
         dockerImage = ''
         }
     stages {
-        // Test stage
-        stage('Run the tests') {
+        stage('Setting Up') {
              agent {
                 docker { 
                     image 'node:14-alpine'
@@ -16,50 +15,55 @@ pipeline {
                 }
             }
             steps {
-                // Get code from git                
-                echo 'Retrieving source code from github'
-                git branch: 'main',
-                    url: 'https://github.com/mannyaboah/AdvDevOpsLearning-Frontend.git'
-                echo 'Did this work?'
+                echo 'Retrieve source from github. run npm install and npm test'
+                git branch: 'manny-jenkins',
+                    url: 'https://github.com/isMunim/AdvDevOpsLearning-Frontend.git'
+                echo 'checking if that worked'
                 sh 'ls -a'
-                
-                // install dependencies
                 sh 'npm install'
-                
-                // testing node app
-                sh 'npm test' 
+                sh 'npm test'
             }
         }
         stage('Building image') {
             steps{
                 script {
                     echo 'build the image' 
+                    dockerImage = docker.build imageName
                 }
             }
+            }
+        stage('Push Image') {
+            steps{
+                script {
+                    echo 'push the image to docker hub' 
+                    docker.withRegistry('', registryCredential) {
+                        dockerImage.push("$BUILD_NUMBER")
+                    }
+                    
+                }
+            }
+        }     
+         stage('deploy to k8s') {
+             agent {
+                docker { 
+                    image 'google/cloud-sdk:latest'
+                    args '-e HOME=/tmp'
+                    reuseNode true
+                        }
+                    }
+            steps {
+                echo 'connecting to the GKE cluster'
+                sh 'gcloud container clusters get-credentials manny-cluster --zone us-central1-a --project dtc-102021-u106'
+                
+                echo 'set image to update the container'
+                sh 'kubectl set image deployment/nodefrontend nodefrontend=$imageName:$BUILD_NUMBER'
+            }
+        }     
+        stage('Remove local docker image') {
+            steps{
+                sh "docker rmi $imageName:latest"
+                sh "docker rmi $imageName:$BUILD_NUMBER"
+            }
         }
-        // stage('Push Image') {
-        //     steps{
-        //         script {
-        //             echo 'push the image to docker hub' 
-        //         }
-        //     }
-        // }     
-        //  stage('deploy to k8s') {
-        //      agent {
-        //         docker { 
-        //             image 'google/cloud-sdk:latest'
-        //             args '-e HOME=/tmp'
-        //             reuseNode true
-        //                 }
-        //             }
-        //     steps {
-        //      }
-        // }     
-        // stage('Remove local docker image') {
-        //     steps{
-        //         sh "docker rmi $imageName:latest"
-        //         sh "docker rmi $imageName:$BUILD_NUMBER"
-        //     }
-        // }
     }
 }
