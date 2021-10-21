@@ -16,6 +16,7 @@ pipeline {
                 }
             }
             steps {
+                // Get code from git                
                 echo 'Retrieving source code from github'
                 git branch: 'main',
                     url: 'https://github.com/mannyaboah/AdvDevOpsLearning-Frontend.git'
