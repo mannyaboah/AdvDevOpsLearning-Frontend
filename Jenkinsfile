@@ -30,13 +30,13 @@ pipeline {
                 sh 'npm test' 
             }
         }
-        // stage('Building image') {
-        //     steps{
-        //         script {
-        //             echo 'build the image' 
-        //         }
-        //     }
-        //     }
+        stage('Building image') {
+            steps{
+                script {
+                    echo 'build the image' 
+                }
+            }
+        }
         // stage('Push Image') {
         //     steps{
         //         script {
